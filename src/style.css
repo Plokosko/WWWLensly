@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-indigo: #4f46e5;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-slate: #1e293b;
+
+  --animate-blob: blob 7s infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+@layer base {
+  :root {
+    --glass-blur: blur(20px);
+    --glass-saturate: saturate(180%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --glass-blur: blur(8px);
+    }
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-50 overflow-x-hidden m-0 p-0;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-xl saturate-150 bg-white/5 border border-white/10 shadow-2xl;
+    backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  }
+
+  .glass-dark {
+    @apply backdrop-blur-2xl saturate-150 bg-black/40 border border-white/5 shadow-2xl;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 50;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .blob {
+    @apply absolute rounded-full mix-blend-screen filter blur-[80px] opacity-70 animate-blob;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
