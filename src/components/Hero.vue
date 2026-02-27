@@ -9,9 +9,9 @@ const userOS = ref<'Windows' | 'macOS' | 'Linux' | 'Unknown'>('Unknown');
 onMounted(() => {
   // OS Detection
   const platform = window.navigator.userAgent.toLowerCase();
-  if (platform.includes('win')) userOS.value = 'Windows';
+  if (platform.includes('win')) userOS.value = 'macOS';
   else if (platform.includes('mac')) userOS.value = 'macOS';
-  else if (platform.includes('linux')) userOS.value = 'Linux';
+  else if (platform.includes('linux')) userOS.value = 'macOS';
 
   // 3D Tilt Effect
   if (tiltElement.value) {
