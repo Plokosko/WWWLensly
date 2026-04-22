@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lensly – Maturitná prezentácia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        @media print {
+            body { 
+                background: #020617 !important; 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page { page-break-after: always; }
+            .no-print { display: none !important; }
+            .slide { min-height: 100vh; }
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            scroll-behavior: smooth;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #818cf8, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .gradient-text-light {
+            background: linear-gradient(to bottom, #fff, rgba(255,255,255,0.4));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .gradient-bar {
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: pulse 10s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(5%, 5%); }
+        }
+        
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .code-editor {
+            background: #0a0a0a;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        
+        .code-keyword { color: #c792ea; }
+        .code-string { color: #c3e88d; }
+        .code-method { color: #82aaff; }
+        .code-comment { color: #546e7a; }
+        
+        .corner-tl { position: absolute; top: 1rem; left: 1rem; width: 1.5rem; height: 1.5rem; border-top: 3px solid #6366f1; border-left: 3px solid #6366f1; }
+        .corner-tr { position: absolute; top: 1rem; right: 1rem; width: 1.5rem; height: 1.5rem; border-top: 3px solid #6366f1; border-right: 3px solid #6366f1; }
+        .corner-bl { position: absolute; bottom: 1rem; left: 1rem; width: 1.5rem; height: 1.5rem; border-bottom: 3px solid #6366f1; border-left: 3px solid #6366f1; }
+        .corner-br { position: absolute; bottom: 1rem; right: 1rem; width: 1.5rem; height: 1.5rem; border-bottom: 3px solid #6366f1; border-right: 3px solid #6366f1; }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #818cf8, transparent);
+            box-shadow: 0 0 15px #818cf8;
+            animation: scan 4s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 50;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+
+        .nav-dot:hover {
+            background: #818cf8;
+            transform: scale(1.5);
+        }
+    </style>
+</head>
+<body class="m-0 p-0">
+
+<div class="noise-overlay"></div>
+
+<!-- Slide 1: Title -->
+<section id="start" class="slide">
+    <div class="blob bg-indigo-600 w-[500px] h-[500px] -top-20 -right-20"></div>
+    <div class="blob bg-violet-600 w-[400px] h-[400px] bottom-20 -left-20"></div>
+    
+    <div class="max-w-5xl mx-auto text-center z-10">
+        <div class="inline-block px-4 py-1 glass rounded-full text-xs font-bold tracking-[0.3em] text-indigo-400 uppercase mb-8">
+            Maturitná práca 2026
+        </div>
+        <h1 class="text-8xl md:text-9xl font-black tracking-tight leading-none mb-8">
+            <span class="gradient-text-light">Lensly</span>
+        </h1>
+        <p class="text-3xl md:text-4xl font-medium mb-12 text-slate-300">
+            Inteligentný prehliadač a editor obrázkov
+        </p>
+        <div class="flex flex-wrap justify-center gap-12 text-slate-400">
+            <div class="text-left">
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Autor</div>
+                <div class="text-xl font-semibold text-white">David Villem</div>
+                <div class="text-sm text-slate-500">IV.B</div>
+            </div>
+            <div class="w-px bg-white/10 hidden md:block"></div>
+            <div class="text-left">
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Školiteľ</div>
+                <div class="text-xl font-semibold text-white">Ing. Mária Poláková</div>
+            </div>
+            <div class="w-px bg-white/10 hidden md:block"></div>
+            <div class="text-left">
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Inštitúcia</div>
+                <div class="text-xl font-semibold text-white">SPŠE Hálova 16</div>
+                <div class="text-sm text-slate-500">Bratislava</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 2: Úvod a Motivácia -->
+<section id="intro" class="slide bg-slate-950/50">
+    <div class="max-w-5xl mx-auto w-full z-10">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+            <div class="md:w-1/2">
+                <h2 class="text-6xl font-black mb-8 gradient-text">Motivácia</h2>
+                <p class="text-xl text-slate-300 leading-relaxed mb-6">
+                    Súčasný digitálny svet generuje obrovské množstvo vizuálnych dát. Tradičné prehliadače sú často len pasívnymi nástrojmi.
+                </p>
+                <div class="glass p-6 rounded-2xl border-indigo-500/20">
+                    <p class="text-indigo-300 font-medium italic">
+                        "Cieľom bolo vytvoriť komplexný systém, ktorý spája vysoký výkon .NET s modernými algoritmami AI pre autonómnu správu fotografií."
+                    </p>
+                </div>
+            </div>
+            <div class="md:w-1/2 grid grid-cols-1 gap-4">
+                <div class="glass p-6 rounded-2xl">
+                    <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                        <span class="text-indigo-400 text-xl">01</span> Inteligentná správa
+                    </h3>
+                    <p class="text-slate-400 text-sm">Automatická kategorizácia a detekcia osôb v reálnom čase.</p>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                        <span class="text-violet-400 text-xl">02</span> Natívny výkon
+                    </h3>
+                    <p class="text-slate-400 text-sm">Využitie GPU akcelerácie Apple Silicon a frameworku Core Image.</p>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                        <span class="text-emerald-400 text-xl">03</span> Súkromie
+                    </h3>
+                    <p class="text-slate-400 text-sm">Všetky biometrické dáta sú spracovávané a ukladané výhradne lokálne.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 3: Technologický Stack -->
+<section id="tech" class="slide">
+    <div class="max-w-6xl mx-auto w-full z-10 text-center">
+        <h2 class="text-5xl font-black mb-16 gradient-text">Technologický Stack</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Core -->
+            <div class="glass p-8 rounded-3xl border-indigo-500/10">
+                <div class="text-4xl mb-4">🚀</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Jadro & UI</h3>
+                <ul class="text-slate-400 space-y-3">
+                    <li><strong class="text-slate-200">.NET 9 (C#)</strong> - Výkonné multiplatformové jadro</li>
+                    <li><strong class="text-slate-200">Avalonia UI</strong> - Reaktívny XAML framework</li>
+                    <li><strong class="text-slate-200">MVVM</strong> - Architektonický vzor</li>
+                </ul>
+            </div>
+            
+            <!-- AI -->
+            <div class="glass p-8 rounded-3xl border-violet-500/10">
+                <div class="text-4xl mb-4">🧠</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Umelá Inteligencia</h3>
+                <ul class="text-slate-400 space-y-3">
+                    <li><strong class="text-slate-200">ONNX Runtime</strong> - AI inference engine</li>
+                    <li><strong class="text-slate-200">ArcFace Model</strong> - Biometrické embeddingy</li>
+                    <li><strong class="text-slate-200">Apple Vision</strong> - Detekcia tvárí</li>
+                </ul>
+            </div>
+            
+            <!-- Native -->
+            <div class="glass p-8 rounded-3xl border-emerald-500/10">
+                <div class="text-4xl mb-4">🍎</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Natívna Vrstva</h3>
+                <ul class="text-slate-400 space-y-3">
+                    <li><strong class="text-slate-200">Swift Interop</strong> - Bridge do macOS API</li>
+                    <li><strong class="text-slate-200">Core Image</strong> - GPU editácia obrazu</li>
+                    <li><strong class="text-slate-200">AVFoundation</strong> - Video playback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 4: AI Detekcia a Rozpoznávanie -->
+<section id="ai" class="slide bg-slate-950/30">
+    <div class="max-w-5xl mx-auto w-full z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-black mb-6 gradient-text">AI Proces</h2>
+            <div class="w-24 h-1 gradient-bar mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+            <!-- Step 1 -->
+            <div class="glass p-6 rounded-2xl text-center">
+                <div class="text-indigo-400 font-black text-3xl mb-2">1.</div>
+                <h4 class="font-bold text-white mb-2">Detekcia</h4>
+                <p class="text-xs text-slate-400">Apple Vision lokalizuje tváre na fotografii.</p>
+            </div>
+            <!-- Step 2 -->
+            <div class="glass p-6 rounded-2xl text-center">
+                <div class="text-indigo-400 font-black text-3xl mb-2">2.</div>
+                <h4 class="font-bold text-white mb-2">Zarovnanie</h4>
+                <p class="text-xs text-slate-400">Normalizácia polohy očí a rotácie tváre.</p>
+            </div>
+            <!-- Step 3 -->
+            <div class="glass p-6 rounded-2xl text-center">
+                <div class="text-indigo-400 font-black text-3xl mb-2">3.</div>
+                <h4 class="font-bold text-white mb-2">Embedding</h4>
+                <p class="text-xs text-slate-400">ArcFace vygeneruje 512-rozmerný vektor.</p>
+            </div>
+            <!-- Step 4 -->
+            <div class="glass p-6 rounded-2xl text-center">
+                <div class="text-indigo-400 font-black text-3xl mb-2">4.</div>
+                <h4 class="font-bold text-white mb-2">Klastrovanie</h4>
+                <p class="text-xs text-slate-400">DBSCAN zoskupí tváre do identít (osôb).</p>
+            </div>
+        </div>
+        
+        <div class="mt-12 glass p-8 rounded-3xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-blue-500/5"></div>
+            <div class="scan-line"></div>
+            <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
+            
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="md:w-1/2">
+                    <h3 class="text-2xl font-bold text-blue-400 mb-4">Algoritmus DBSCAN</h3>
+                    <ul class="text-slate-300 space-y-2">
+                        <li>• Autonómne určenie počtu osôb</li>
+                        <li>• Odolnosť voči šumu (neznáme tváre)</li>
+                        <li>• Uhlová (kosinusová) podobnosť vektorov</li>
+                    </ul>
+                </div>
+                <div class="md:w-1/2 p-4 glass-dark rounded-xl">
+                    <div class="text-xs font-mono text-slate-500 mb-2">// Clustering logic</div>
+                    <div class="text-sm text-indigo-300">
+                        var clusters = DBSCAN.Process(embeddings, eps: 0.5, minPts: 3);
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 5: Vlastné ovládacie prvky -->
+<section id="controls" class="slide">
+    <div class="max-w-5xl mx-auto w-full z-10">
+        <h2 class="text-5xl font-black mb-12 gradient-text text-center">Implementácia UI</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass p-8 rounded-3xl">
+                <h3 class="text-xl font-bold text-indigo-400 mb-6 flex items-center gap-2">
+                    <span>✨</span> Vlastné komponenty
+                </h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">SegmentedControl</h4>
+                        <p class="text-slate-400 text-sm">Plynulé prepínanie zobrazení s kubickým easingom a obojsmernou dátovou väzbou.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">GlassBorder</h4>
+                        <p class="text-slate-400 text-sm">Komponent s efektom matného skla pre moderný macOS vizuál.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-2">Viewport-based Loading</h4>
+                        <p class="text-slate-400 text-sm">Načítavanie miniatúr len pre viditeľnú oblasť s bufferom (Virtualization).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass p-8 rounded-3xl">
+                <h3 class="text-xl font-bold text-violet-400 mb-6 flex items-center gap-2">
+                    <span>🔄</span> Interaktivita
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                        <span class="text-slate-300">Debounce editácie</span>
+                        <span class="text-violet-400 font-mono">30 ms</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                        <span class="text-slate-300">Scroll throttling</span>
+                        <span class="text-violet-400 font-mono">150 ms</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                        <span class="text-slate-300">Cubic Easing</span>
+                        <span class="text-violet-400 font-mono">EaseInOut</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                        <span class="text-slate-300">FPS Galérie</span>
+                        <span class="text-emerald-400 font-mono">60 FPS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 6: Natívny Bridge (C# -> Swift) -->
+<section id="bridge" class="slide bg-slate-950/50">
+    <div class="max-w-5xl mx-auto w-full z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-black mb-6 gradient-text">Native Interop Bridge</h2>
+            <p class="text-slate-400 text-lg">Prepojenie .NET a macOS Silicon výkonu</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-dark rounded-2xl overflow-hidden border border-white/5">
+                <div class="bg-indigo-500/10 px-4 py-2 flex items-center justify-between">
+                    <span class="text-xs font-mono text-indigo-300 uppercase tracking-widest">C# (Managed Layer)</span>
+                    <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-400/50"></div><div class="w-2 h-2 rounded-full bg-yellow-400/50"></div><div class="w-2 h-2 rounded-full bg-green-400/50"></div></div>
+                </div>
+                <div class="p-4 text-xs font-mono leading-relaxed">
+                    <div>[<span class="code-method">DllImport</span>(<span class="code-string">"libLenslyNative.dylib"</span>)]</div>
+                    <div><span class="code-keyword">public static extern bool</span> <span class="code-method">Lensly_ApplyEdit</span>(</div>
+                    <div class="ml-4"><span class="code-keyword">string</span> inputPath,</div>
+                    <div class="ml-4"><span class="code-keyword">string</span> outputPath,</div>
+                    <div class="ml-4"><span class="code-keyword">float</span> brightness,</div>
+                    <div class="ml-4"><span class="code-keyword">float</span> contrast);</div>
+                </div>
+            </div>
+            
+            <div class="glass-dark rounded-2xl overflow-hidden border border-white/5">
+                <div class="bg-violet-500/10 px-4 py-2 flex items-center justify-between">
+                    <span class="text-xs font-mono text-violet-300 uppercase tracking-widest">Swift (Native Layer)</span>
+                    <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-400/50"></div><div class="w-2 h-2 rounded-full bg-yellow-400/50"></div><div class="w-2 h-2 rounded-full bg-green-400/50"></div></div>
+                </div>
+                <div class="p-4 text-xs font-mono leading-relaxed">
+                    <div><span class="code-keyword">@_cdecl</span>(<span class="code-string">"Lensly_ApplyEdit"</span>)</div>
+                    <div><span class="code-keyword">public func</span> <span class="code-method">Lensly_ApplyEdit</span>(...) -> <span class="code-keyword">Bool</span> {</div>
+                    <div class="ml-4"><span class="code-keyword">let</span> ciImage = <span class="code-method">CIImage</span>(contentsOf: url)</div>
+                    <div class="ml-4"><span class="code-keyword">let</span> filter = <span class="code-method">CIFilter</span>.colorControls()</div>
+                    <div class="ml-4">filter.inputImage = ciImage</div>
+                    <div class="ml-4"><span class="code-keyword">return</span> <span class="code-method">saveToDisk</span>(filter.outputImage)</div>
+                    <div>}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center text-slate-400 text-sm">
+            Tento hybridný prístup umožňuje GPU-akcelerovanú editáciu obrazu priamo cez Metal API bez medzivýsledkov v pamäti.
+        </div>
+    </div>
+</section>
+
+<!-- Slide 7: Výkonové Metriky -->
+<section id="metrics" class="slide">
+    <div class="max-w-5xl mx-auto w-full z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-black mb-6 gradient-text">Výkon a Stabilita</h2>
+            <div class="w-24 h-1 gradient-bar mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass p-6 rounded-3xl text-center">
+                <div class="text-4xl font-black text-indigo-400 mb-2">60</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">FPS Scrollovanie</div>
+            </div>
+            <div class="glass p-6 rounded-3xl text-center">
+                <div class="text-4xl font-black text-violet-400 mb-2">&lt;3s</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Init 1000 foto</div>
+            </div>
+            <div class="glass p-6 rounded-3xl text-center">
+                <div class="text-4xl font-black text-blue-400 mb-2">1.2GB</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Max RAM Usage</div>
+            </div>
+            <div class="glass p-6 rounded-3xl text-center">
+                <div class="text-4xl font-black text-emerald-400 mb-2">10k+</div>
+                <div class="text-xs uppercase tracking-widest text-slate-500">Kapacita Galérie</div>
+            </div>
+        </div>
+        
+        <div class="glass p-8 rounded-3xl">
+            <h3 class="text-xl font-bold text-center mb-8 text-white">Analýza AI výkonu (100 fotografií / 250 tvárí)</h3>
+            <div class="space-y-4">
+                <div class="relative h-8 bg-white/5 rounded-full overflow-hidden">
+                    <div class="absolute top-0 left-0 h-full bg-indigo-500 w-[70%]"></div>
+                    <div class="absolute top-0 left-0 w-full h-full flex items-center px-4 justify-between text-xs font-bold">
+                        <span>Apple Vision Detekcia</span>
+                        <span>~ 3.5 min</span>
+                    </div>
+                </div>
+                <div class="relative h-8 bg-white/5 rounded-full overflow-hidden">
+                    <div class="absolute top-0 left-0 h-full bg-violet-500 w-[20%]"></div>
+                    <div class="absolute top-0 left-0 w-full h-full flex items-center px-4 justify-between text-xs font-bold">
+                        <span>ArcFace Embeddingy</span>
+                        <span>~ 45 sek</span>
+                    </div>
+                </div>
+                <div class="relative h-8 bg-white/5 rounded-full overflow-hidden">
+                    <div class="absolute top-0 left-0 h-full bg-emerald-500 w-[5%]"></div>
+                    <div class="absolute top-0 left-0 w-full h-full flex items-center px-4 justify-between text-xs font-bold">
+                        <span>DBSCAN Klastrovanie</span>
+                        <span>&lt; 1 sek</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 8: Cenová Kalkulácia -->
+<section id="pricing" class="slide bg-slate-950/50">
+    <div class="max-w-4xl mx-auto w-full z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-black mb-6 gradient-text">Cenová Kalkulácia</h2>
+            <div class="w-24 h-1 gradient-bar mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="glass rounded-3xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-white/5">
+                        <th class="p-6 font-bold text-indigo-400 uppercase tracking-widest text-sm">Položka / Výdavok</th>
+                        <th class="p-6 font-bold text-indigo-400 uppercase tracking-widest text-sm text-right">Cena</th>
+                    </tr>
+                </thead>
+                <tbody class="text-slate-300">
+                    <tr class="border-b border-white/5">
+                        <td class="p-6">Doména na 1 rok (.com / .sk)</td>
+                        <td class="p-6 text-right font-mono">12,90 €</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-6">Hosting (Cloud / VPS) na 1 rok</td>
+                        <td class="p-6 text-right font-mono">39,90 €</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-6">Apple Developer Program (Ročný poplatok)</td>
+                        <td class="p-6 text-right font-mono">99,00 €</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-6">Vyhotovenie projektu (Vývojové hodiny)</td>
+                        <td class="p-6 text-right font-mono">1 200,00 €</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="p-6">Údržba a technická podpora</td>
+                        <td class="p-6 text-right font-mono">500,00 €</td>
+                    </tr>
+                    <tr class="bg-indigo-500/10">
+                        <td class="p-6 font-black text-white text-xl">Spolu</td>
+                        <td class="p-6 text-right font-black text-indigo-400 text-2xl">1 851,80 €</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 9: Záver -->
+<section id="conclusion" class="slide">
+    <div class="max-w-4xl mx-auto w-full z-10 text-center">
+        <h2 class="text-6xl font-black mb-12 gradient-text">Zhodnotenie</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div class="glass p-8 rounded-3xl text-left">
+                <h3 class="text-2xl font-bold text-indigo-400 mb-6">Prínosy projektu</h3>
+                <ul class="space-y-4 text-slate-300">
+                    <li class="flex items-start gap-3">
+                        <span class="text-indigo-500 mt-1">✓</span>
+                        <span>Preukázanie lokálneho AI spracovania na desktopoch.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-indigo-500 mt-1">✓</span>
+                        <span>Efektívna správa biometrických dát s dôrazom na súkromie.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-indigo-500 mt-1">✓</span>
+                        <span>Stabilná integrácia multiplatformových a natívnych systémov.</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="glass p-8 rounded-3xl text-left">
+                <h3 class="text-2xl font-bold text-violet-400 mb-6">Možnosti rozšírenia</h3>
+                <ul class="space-y-4 text-slate-300">
+                    <li class="flex items-start gap-3">
+                        <span class="text-violet-500 mt-1">✦</span>
+                        <span>Integrácia s cloudovými službami (voliteľne).</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-violet-500 mt-1">✦</span>
+                        <span>Podpora pre RAW formáty cez natívne dekodéry.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-violet-500 mt-1">✦</span>
+                        <span>Mobilná verzia (Avalonia for Mobile).</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="glass p-12 rounded-[3rem] bg-indigo-500/5">
+            <h1 class="text-8xl md:text-9xl font-black mb-6 gradient-text">Ďakujem</h1>
+            <p class="text-2xl text-slate-400 mb-8 font-medium italic">za vašu pozornosť</p>
+            <div class="h-1 w-32 gradient-bar mx-auto rounded-full"></div>
+        </div>
+    </div>
+</section>
+
+<div class="nav-dots no-print">
+    <a href="#start" class="nav-dot" title="Štart"></a>
+    <a href="#intro" class="nav-dot" title="Úvod"></a>
+    <a href="#tech" class="nav-dot" title="Technológie"></a>
+    <a href="#ai" class="nav-dot" title="Umelá Inteligencia"></a>
+    <a href="#controls" class="nav-dot" title="Implementácia"></a>
+    <a href="#bridge" class="nav-dot" title="Native Interop"></a>
+    <a href="#metrics" class="nav-dot" title="Výkon"></a>
+    <a href="#pricing" class="nav-dot" title="Cena"></a>
+    <a href="#conclusion" class="nav-dot" title="Záver"></a>
+</div>
+
+</body>
+</html>
